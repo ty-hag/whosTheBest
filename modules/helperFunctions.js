@@ -17,7 +17,7 @@ const minutes = data.minutes > 0 ? ` ${data.minutes} minutes,`: '';
 const seconds = data.seconds > 0 ? ` ${data.seconds} seconds,`: '';
 const milliseconds = data.milliseconds > 0 ? ` ${data.seconds > 0 ? 'and' : ''} ${data.milliseconds} milliseconds.`: '';
 
-return `${bestPerson} has been the best for${ years + months + days + hours + minutes + seconds + milliseconds}`;
+return `${bestPerson} is the best and has been so for${ years + months + days + hours + minutes + seconds + milliseconds}`;
 };
 
 module.exports = {

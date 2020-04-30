@@ -1,10 +1,10 @@
 require('dotenv').config();
 
-var admin = require("firebase-admin");
-var moment = require('moment');
-var helpers = require('./helperFunctions');
+const admin = require("firebase-admin");
+const moment = require('moment');
+const helpers = require('./helperFunctions');
 
-var serviceAccount = require('../keys/' + process.env.FIREBASE_KEYS_FILENAME);
+const serviceAccount = require('../keys/' + process.env.FIREBASE_KEYS_FILENAME);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -35,10 +35,8 @@ const changeCurrentBest = name => {
           becameBestAt: Date.now()
         }
       )
-      console.log('Update successful.');
       resolve();
     } catch (error) {
-      console.log('Update failed.');
       reject(error);
     }
   })
@@ -51,13 +49,11 @@ const checkCurrentBest = () => {
     const currentBestDataSnapshot = await currentBestRef.once('value');
 
     // format data
-    const name = currentBestDataSnapshot.val().name;
-    const becameBestAt = moment(currentBestDataSnapshot.val().becameBestAt);
-    const noLongerBestAt = moment();
-    const durationData = moment.duration(noLongerBestAt.diff(becameBestAt))._data;
+    const bestData = {};
+    bestData.name = currentBestDataSnapshot.val().name;
+    bestData.becameBestAt = currentBestDataSnapshot.val().becameBestAt;
 
-    const outputSentence = helpers.getDurationSentence(name, durationData);
-    resolve(outputSentence);
+    resolve(bestData);
   })
 }
 
