@@ -9,8 +9,8 @@ const setNewBest = (message) => {
   return new Promise(async (resolve, reject) => {
     try {
       const newBest = bestRegex.exec(message.content)[2];
-      await database.changeCurrentBest(newBest);
-      message.channel.send(`${newBest} has been declared the best!`);
+      const resultMessage = await database.changeCurrentBest(newBest);
+      message.channel.send(resultMessage);
       resolve();
     } catch (error) {
       console.log('Error in setNewBest:');

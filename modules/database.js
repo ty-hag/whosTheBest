@@ -26,16 +26,21 @@ const durationFormat = {
 // functions
 
 const changeCurrentBest = name => {
-  // update/overwrite current best with new best
+  // update/overwrite current best with new best, return message describing result of change or lack thereof
   return new Promise(async (resolve, reject) => {
     try {
-      await currentBestRef.set(
-        {
-          name,
-          becameBestAt: Date.now()
-        }
-      )
-      resolve();
+      const currentBest = await checkCurrentBest();
+      if (currentBest.name.toLowerCase() === name.toLowerCase()) {
+        resolve(`${name} is already the best!`);
+      } else {
+        await currentBestRef.set(
+          {
+            name,
+            becameBestAt: Date.now()
+          }
+        )
+        resolve(`${name} has been declared the best!`);
+      }
     } catch (error) {
       reject(error);
     }
