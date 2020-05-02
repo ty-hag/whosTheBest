@@ -5,10 +5,10 @@ const moment = require('moment');
 
 const bestRegex = /(.*[!,.:;] )?(.*[^,])('s| is| iz|,? you're|,? you're|,? you are|,? you|,? u| are| r) (the|da|ze|duh|tha) (best|bez|bes|bestest)(.*[^\\?]$)/;
 
-const setNewBest = (message) => {
+const setNewBest = (message, newBestWasAYou) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const newBest = bestRegex.exec(message.content)[2];
+      const newBest = newBestWasAYou ? newBestWasAYou : bestRegex.exec(message.content)[2];
       const resultMessage = await database.changeCurrentBest(newBest);
       message.channel.send(resultMessage);
       resolve();
