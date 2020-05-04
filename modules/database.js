@@ -14,6 +14,7 @@ admin.initializeApp({
 const app = admin.app();
 const db = admin.database();
 const currentBestRef = db.ref('currentBest');
+const previousBestRef = db.ref('previousBest');
 
 // setting for duration output
 const durationFormat = {
@@ -25,58 +26,98 @@ const durationFormat = {
 
 // functions
 
-const changeCurrentBest = name => {
-  // update/overwrite current best with new best, return message describing result of change or lack thereof
+const setCurrentBest = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const currentBest = await checkCurrentBest();
-      if (currentBest.name.toLowerCase() === name.toLowerCase()) {
-        resolve(`${name} is already the best!`);
-      } else {
-        await currentBestRef.set(
-          {
-            name,
-            becameBestAt: Date.now()
-          }
-        )
-        resolve(`${name} has been declared the best!`);
-      }
+      await currentBestRef.set(
+        {
+          name: data.name,
+          declaredBy: data.declaredBy,
+          becameBestAt: data.becameBestAt
+        }
+      )
+      resolve();
     } catch (error) {
+      console.log('Error in setCurrentBest:')
+      console.log(error);
       reject(error);
     }
   })
 }
 
-const checkCurrentBest = () => {
+const setPreviousBest = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await previousBestRef.set(data);
+      resolve();
+    } catch (error) {
+      console.log('Error in setPreviousBest:')
+      console.log(error);
+      reject(error);
+    }
+  })
+}
+
+const getCurrentBest = () => {
   // return the name of the current best and how long they've been the best for
   return new Promise(async (resolve, reject) => {
-    // query db
-    const currentBestDataSnapshot = await currentBestRef.once('value');
+    try {
+      // query db
+      const currentBestDataSnapshot = await currentBestRef.once('value');
 
-    // format data
-    const bestData = {};
-    bestData.name = currentBestDataSnapshot.val().name;
-    bestData.becameBestAt = currentBestDataSnapshot.val().becameBestAt;
+      // format data
+      const bestData = {};
+      bestData.name = currentBestDataSnapshot.val().name;
+      bestData.becameBestAt = currentBestDataSnapshot.val().becameBestAt;
+      bestData.declaredBy = currentBestDataSnapshot.val().declaredBy;
 
-    resolve(bestData);
+      resolve(bestData);
+    } catch (error) {
+      console.log('Error in getCurrentBest:')
+      console.log(error);
+      reject(error);
+    }
+
   })
 }
 
-const disconnect = () => {
-  // Do I really need to return a promise here? In current testing state no,
-  // but if I want to do something after this at some point it might be good?
+const getPreviousBest = () => {
+  // return the name of the current best and how long they've been the best for
   return new Promise(async (resolve, reject) => {
-    console.log('Attempting to close connection.');
-    await app.delete();
-    // Do I need error handling here? Probably should have it but not sure how
-    // to implement without .then and .catch. I guess I could just use those.
-    // https://firebase.google.com/docs/reference/admin/node/admin.app.App?authuser=0#delete
-    resolve();
+    try {
+      // query db
+      const previousBestDataSnapshot = await previousBestRef.once('value');
+
+      // format data
+      const previousBestData = {};
+      previousBestData.name = previousBestDataSnapshot.val().name;
+      previousBestData.becameBestAt = previousBestDataSnapshot.val().becameBestAt;
+      previousBestData.declaredBy = previousBestDataSnapshot.val().declaredBy;
+
+      resolve(previousBestData);
+    } catch (error) {
+      console.log('Error in getPreviousBest:')
+      console.log(error);
+      reject(error);
+    }
+
   })
 }
+
+
+// Used for testing
+// const disconnectFromDb = () => {
+//   return new Promise(async (resolve, reject) => {
+//     console.log('Attempting to close connection.');
+//     await app.delete();
+//     // https://firebase.google.com/docs/reference/admin/node/admin.app.App?authuser=0#delete
+//     resolve();
+//   })
+// }
 
 module.exports = {
-  changeCurrentBest,
-  checkCurrentBest,
-  disconnect
+  setCurrentBest,
+  setPreviousBest,
+  getCurrentBest,
+  getPreviousBest
 };
