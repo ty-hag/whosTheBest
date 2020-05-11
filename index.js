@@ -4,8 +4,18 @@ Discord bot to keep track of who is the best
 
 TODO:
 
+Testing
+- (WIP) Write test for database functions
+  - (WIP) Tests for getCurrentBest
+    - (WIP) returns object
+- (NOT STARTED) Write tests for handlers.handleDeclaration
+ - (NOT STARTED) Write test for duplicate best declaration
+ - (NOT STARTED) Write test for new best declaration
+
 Handle pronouns
 - (DONE) 2nd person
+- (NOT STARTED) Buggy? If bot just booted and first input received is "you're the best", this line in handleDeclaration breaks bc empty string is passed for newBestWasAYou:
+    const newBest = newBestWasAYou ? newBestWasAYou : bestRegex.exec(message.content)[2];
 - (NOT STARTED) 3rd person
 - (NOT STARTED) Consider: if user says pronoun only, bot asks for specific name, if you again, bot is declared the best 
 
@@ -15,6 +25,7 @@ Seed database
 
 const handlers = require('./modules/handlers');
 const Discord = require('discord.js');
+const { youBestRegex, newBestRegex, checkBestRegex, rescindRegex } = require('./regexes');
 
 const client = new Discord.Client();
 
@@ -22,25 +33,23 @@ client.once('ready', () => {
   console.log('whosTheBest bot active!');
 });
 
-const youBestRegex = /^(.*, )?(you|you're|ur|you are) (the|da|tha) (best|bes|bestest)/i;
-const newBestRegex = /(.*[!,.:;] )?(.*[^,])('s| is| iz|,? you're|,? you're|,? you are|,? you|,? u| are| r) (the|teh|da|ze|duh|tha) (best|bez|bes|bestest)(.*[^\\?]$)/i;
-const checkBestRegex = /(who's|who|who is) (the|da|ze) (best)[\\?]?/i;
-const rescindRegex = /I take back that best declaration[.!]?/i;
 let authorOfLastMessage = '';
 
 client.on('message', async message => {
 
-  if(rescindRegex.test(message.content) && !message.author.bot){
+  if (message.author.bot) {
+    return;
+  } else if (rescindRegex.test(message.content)) {
     await handlers.handleRescission(message);
-  } else if(youBestRegex.test(message.content) && !message.author.bot){
+  } else if (youBestRegex.test(message.content)) {
     await handlers.handleDeclaration(message, authorOfLastMessage);
-  } else if (checkBestRegex.test(message.content) && !message.author.bot) { //  message.author has property user when it's a user and clientUser when it's a bot?
+  } else if (checkBestRegex.test(message.content)) {
     await handlers.handleQuestionCurrentBest(message);
-  } else if (newBestRegex.test(message.content) && !message.author.bot) {
+  } else if (newBestRegex.test(message.content)) {
     await handlers.handleDeclaration(message, null);
   }
 
-  if(!message.author.bot && (message.author.username !== authorOfLastMessage)){
+  if (message.author.username !== authorOfLastMessage) {
     authorOfLastMessage = message.author.username;
   }
 

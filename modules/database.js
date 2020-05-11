@@ -29,13 +29,14 @@ const durationFormat = {
 const setCurrentBest = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await currentBestRef.set(
+      const setResult = await currentBestRef.set(
         {
           name: data.name,
           declaredBy: data.declaredBy,
           becameBestAt: data.becameBestAt
         }
       )
+      console.log(setResult);
       resolve();
     } catch (error) {
       console.log('Error in setCurrentBest:')
@@ -104,20 +105,33 @@ const getPreviousBest = () => {
   })
 }
 
+const getTopTen = () => {
+  return new Promise (async (resolve, reject) => {
+    try{
+
+    } catch (error) {
+      console.log('Error in getTopTen:')
+      console.log(error);
+      reject(error);
+    }
+  })
+}
+
 
 // Used for testing
-// const disconnectFromDb = () => {
-//   return new Promise(async (resolve, reject) => {
-//     console.log('Attempting to close connection.');
-//     await app.delete();
-//     // https://firebase.google.com/docs/reference/admin/node/admin.app.App?authuser=0#delete
-//     resolve();
-//   })
-// }
+const disconnectFromDb = () => {
+  return new Promise(async (resolve, reject) => {
+    console.log('Attempting to close db connection.');
+    await app.delete();
+    // https://firebase.google.com/docs/reference/admin/node/admin.app.App?authuser=0#delete
+    resolve();
+  })
+}
 
 module.exports = {
   setCurrentBest,
   setPreviousBest,
   getCurrentBest,
-  getPreviousBest
+  getPreviousBest,
+  disconnectFromDb
 };

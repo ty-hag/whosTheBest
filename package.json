@@ -1,0 +1,32 @@
+{
+  "name": "whosthebest",
+  "version": "1.0.0",
+  "description": "whosTheBest discord bot",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^4.2.0",
+    "discord.js": "^12.2.0",
+    "dotenv": "^8.2.0",
+    "firebase-admin": "^8.11.0",
+    "moment": "^2.24.0"
+  },
+  "devDependencies": {
+    "mocha": "^7.1.2"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ty-hag/whosTheBest.git"
+  },
+  "author": "Tyler Hagen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ty-hag/whosTheBest/issues"
+  },
+  "homepage": "https://github.com/ty-hag/whosTheBest#readme"
+}

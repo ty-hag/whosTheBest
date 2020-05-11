@@ -1,6 +1,5 @@
 const database = require('./database');
 const helpers = require('./helperFunctions');
-const Discord = require('discord.js');
 const moment = require('moment');
 
 const bestRegex = /(.*[!,.:;] )?(.*[^,])('s| is| iz|,? you're|,? you're|,? you are|,? you|,? u| are| r) (the|da|ze|duh|tha) (best|bez|bes|bestest)(.*[^\\?]$)/;
