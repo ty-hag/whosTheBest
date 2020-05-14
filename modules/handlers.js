@@ -1,8 +1,7 @@
 const database = require('./database');
 const helpers = require('./helperFunctions');
 const moment = require('moment');
-
-const bestRegex = /(.*[!,.:;] )?(.*[^,])('s| is| iz|,? you're|,? you're|,? you are|,? you|,? u| are| r) (the|da|ze|duh|tha) (best|bez|bes|bestest)(.*[^\\?]$)/;
+const { newBestRegex } = require('../regexs');
 
 const handleDeclaration = (message, newBestWasAYou) => {
   // newBestWasAYou means the author only said "You're the best". In that case we assume they're referring to
@@ -10,7 +9,7 @@ const handleDeclaration = (message, newBestWasAYou) => {
   // If the author specified who is the best, newBestWasAYou is null
   return new Promise(async (resolve, reject) => {
     try {
-      const newBest = newBestWasAYou ? newBestWasAYou : bestRegex.exec(message.content)[2];
+      const newBest = newBestWasAYou ? newBestWasAYou : newBestRegex.exec(message.content)[2];
       const currentBest = await database.getCurrentBest();
       if (currentBest.name.toLowerCase() === newBest.toLowerCase()) {
         message.channel.send(`${newBest} is already the best!`);

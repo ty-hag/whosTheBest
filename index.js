@@ -25,7 +25,7 @@ Seed database
 
 const handlers = require('./modules/handlers');
 const Discord = require('discord.js');
-const { youBestRegex, newBestRegex, checkBestRegex, rescindRegex } = require('./regexes');
+const { youBestRegex, newBestRegex, checkBestRegex, rescindRegex } = require('./regexs');
 
 const client = new Discord.Client();
 

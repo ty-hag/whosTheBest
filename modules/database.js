@@ -29,14 +29,13 @@ const durationFormat = {
 const setCurrentBest = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      const setResult = await currentBestRef.set(
+      await currentBestRef.set( // for reference, this function call returns undefined when successful
         {
           name: data.name,
           declaredBy: data.declaredBy,
           becameBestAt: data.becameBestAt
         }
       )
-      console.log(setResult);
       resolve();
     } catch (error) {
       console.log('Error in setCurrentBest:')
@@ -106,8 +105,8 @@ const getPreviousBest = () => {
 }
 
 const getTopTen = () => {
-  return new Promise (async (resolve, reject) => {
-    try{
+  return new Promise(async (resolve, reject) => {
+    try {
 
     } catch (error) {
       console.log('Error in getTopTen:')

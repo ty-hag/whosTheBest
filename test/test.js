@@ -1,7 +1,8 @@
+require('dotenv').config();
 const database = require('../modules/database');
 const expect = require('chai').expect;
-const assert = require('chai').assert;
-const should = require('chai').should;
+
+console.log(process.env.NODE_ENV);
 
 // describe('database functions', async () => {
 
