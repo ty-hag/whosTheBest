@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "firebase-admin": "^8.11.0",
@@ -17,7 +18,7 @@
     "mocha": "^7.1.2"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "env TESTING=1 mocha"
   },
   "repository": {
     "type": "git",

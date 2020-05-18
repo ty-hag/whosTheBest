@@ -13,8 +13,8 @@ admin.initializeApp({
 
 const app = admin.app();
 const db = admin.database();
-const currentBestRef = db.ref('currentBest');
-const previousBestRef = db.ref('previousBest');
+const currentBestRef = process.env.TESTING ? db.ref('test/currentBest') : db.ref('currentBest');
+const previousBestRef = process.env.TESTING ? db.ref('test/previousBest') : db.ref('previousBest');
 
 // setting for duration output
 const durationFormat = {
@@ -28,6 +28,15 @@ const durationFormat = {
 
 const setCurrentBest = (data) => {
   return new Promise(async (resolve, reject) => {
+
+    // validate data
+    const validName = typeof (data.name) === 'string' && data.name.length > 0 ? true : false;
+    const validDeclaredBy = typeof (data.declaredBy) === 'string' && data.declaredBy.length > 0 ? true : false;
+    const validBecameBestAt = typeof (data.becameBestAt) === 'number' && data.becameBestAt > -1 ? true : false;
+    if (!validName || !validDeclaredBy || !validBecameBestAt) {
+      reject(`setCurrentBest received invalid input. Values on argument: ${data.name}, ${data.declaredBy}, ${data.validBecameBestAt})`);
+    }
+
     try {
       await currentBestRef.set( // for reference, this function call returns undefined when successful
         {
@@ -127,10 +136,30 @@ const disconnectFromDb = () => {
   })
 }
 
+const wipeTestData = () => {
+  if (!process.env.TESTING) { // stop this from running in prod
+    return;
+  } else {
+    return new Promise(async (resolve, reject) => {
+      try {
+        await currentBestRef.remove();
+        await previousBestRef.remove();
+        resolve();
+      } catch (error) {
+        console.log('Error in wipeData:')
+        console.log(error);
+        reject(error);
+      }
+    }
+    )
+  }
+}
+
 module.exports = {
   setCurrentBest,
   setPreviousBest,
   getCurrentBest,
   getPreviousBest,
-  disconnectFromDb
+  disconnectFromDb,
+  wipeTestData
 };

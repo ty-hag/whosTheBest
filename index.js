@@ -19,9 +19,10 @@ Handle pronouns
 - (NOT STARTED) 3rd person
 - (NOT STARTED) Consider: if user says pronoun only, bot asks for specific name, if you again, bot is declared the best 
 
-Seed database
+Seed test database
 
 */
+
 
 const handlers = require('./modules/handlers');
 const Discord = require('discord.js');
