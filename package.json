@@ -12,7 +12,8 @@
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "firebase-admin": "^8.11.0",
-    "moment": "^2.24.0"
+    "moment": "^2.24.0",
+    "sinon": "^9.0.2"
   },
   "devDependencies": {
     "mocha": "^7.1.2"

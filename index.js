@@ -6,10 +6,11 @@ TODO:
 
 Testing
 - (WIP) Write test for database functions
-  - (WIP) Tests for getCurrentBest
-    - (WIP) returns object
+  - (DONE) Tests for getCurrentBest
+  - (DONE) Tests for setCurrentBest
 - (NOT STARTED) Write tests for handlers.handleDeclaration
  - (NOT STARTED) Write test for duplicate best declaration
+ - (NOT STARTED) Write test for ambiguous best declaration
  - (NOT STARTED) Write test for new best declaration
 
 Handle pronouns
@@ -19,7 +20,7 @@ Handle pronouns
 - (NOT STARTED) 3rd person
 - (NOT STARTED) Consider: if user says pronoun only, bot asks for specific name, if you again, bot is declared the best 
 
-Seed test database
+(DONE) Seed test database
 
 */
 
