@@ -9,6 +9,8 @@ chai.use(chaiAsPromised);
 const expect = chai.expect;
 const sinon = require('sinon');
 
+const fakeGuildId = '12345678';
+
 describe('app', async () => {
 
 
@@ -23,12 +25,12 @@ describe('app', async () => {
       declaredBy: 'Declared By Current',
       becameBestAt: Date.parse('04 Dec 1995 00:12:00 GMT')
     };
-    await database.setPreviousBest(previousBestSeed);
-    await database.setCurrentBest(currentBestSeed);
+    await database.setPreviousBest(previousBestSeed, fakeGuildId);
+    await database.setCurrentBest(currentBestSeed, fakeGuildId);
   });
 
   after('disconnect from db', async () => {
-    await database.wipeTestData();
+    await database.wipeTestData(fakeGuildId);
     await database.disconnectFromDb();
   })
 
@@ -40,7 +42,7 @@ describe('app', async () => {
       let getCurrentBestReturned = {};
 
       before('testing return object', async () => {
-        getCurrentBestReturned = await database.getCurrentBest();
+        getCurrentBestReturned = await database.getCurrentBest(fakeGuildId);
       });
 
       it('should return an object', async () => {
@@ -70,7 +72,7 @@ describe('app', async () => {
       let getPreviousBestReturned = {};
 
       before('testing return object', async () => {
-        getPreviousBestReturned = await database.getPreviousBest();
+        getPreviousBestReturned = await database.getPreviousBest(fakeGuildId);
       });
 
       it('should return an object', async () => {
@@ -104,8 +106,8 @@ describe('app', async () => {
           becameBestAt: Date.parse('01 Jan 2000 00:00:00 GMT')
         };
 
-        await database.setCurrentBest(newCurrentBestDataToSet);
-        returnedNewCurrentBestData = await database.getCurrentBest();
+        await database.setCurrentBest(newCurrentBestDataToSet, fakeGuildId);
+        returnedNewCurrentBestData = await database.getCurrentBest(fakeGuildId);
 
         expect(returnedNewCurrentBestData.name).to.equal('New Best')
           && expect(returnedNewCurrentBestData.declaredBy).to.equal('Declared By New')
@@ -119,7 +121,7 @@ describe('app', async () => {
           declaredBy: 'Declared By New',
           becameBestAt: Date.parse('01 Jan 2000 00:00:00 GMT')
         };
-        return expect(database.setCurrentBest(badStringData)).to.be.rejected;
+        return expect(database.setCurrentBest(badStringData, fakeGuildId)).to.be.rejected;
       })
 
       it('should reject a name argument with a string length that is less than 1', async () => {
@@ -128,7 +130,7 @@ describe('app', async () => {
           declaredBy: 'Declared By New',
           becameBestAt: Date.parse('01 Jan 2000 00:00:00 GMT')
         };
-        return expect(database.setCurrentBest(badStringData)).to.be.rejected;
+        return expect(database.setCurrentBest(badStringData, fakeGuildId)).to.be.rejected;
       })
 
       it('should reject a declaredBy argument with a non-string value', async () => {
@@ -137,7 +139,7 @@ describe('app', async () => {
           declaredBy: 1234,
           becameBestAt: Date.parse('01 Jan 2000 00:00:00 GMT')
         };
-        return expect(database.setCurrentBest(badStringData)).to.be.rejected;
+        return expect(database.setCurrentBest(badStringData, fakeGuildId)).to.be.rejected;
       })
 
       it('should reject a declaredBy argument with a string length that is less than 1', async () => {
@@ -146,7 +148,7 @@ describe('app', async () => {
           declaredBy: '',
           becameBestAt: Date.parse('01 Jan 2000 00:00:00 GMT')
         };
-        return expect(database.setCurrentBest(badStringData)).to.be.rejected;
+        return expect(database.setCurrentBest(badStringData, fakeGuildId)).to.be.rejected;
       })
 
       it('should reject a becameBestAt argument with a non-number value', async () => {
@@ -155,7 +157,7 @@ describe('app', async () => {
           declaredBy: 'Berobi',
           becameBestAt: 'Some time'
         };
-        return expect(database.setCurrentBest(badStringData)).to.be.rejected;
+        return expect(database.setCurrentBest(badStringData, fakeGuildId)).to.be.rejected;
       })
 
       it('should reject a becameBestAt argument with a value that is less than 0', async () => {
@@ -164,7 +166,7 @@ describe('app', async () => {
           declaredBy: 'Berobi',
           becameBestAt: -1
         };
-        return expect(database.setCurrentBest(badStringData)).to.be.rejected;
+        return expect(database.setCurrentBest(badStringData, fakeGuildId)).to.be.rejected;
       })
     })
 
@@ -180,8 +182,8 @@ describe('app', async () => {
           becameBestAt: Date.parse('01 Jan 2000 00:00:00 GMT')
         };
 
-        await database.setPreviousBest(newPreviousBestDataToSet);
-        returnedNewPreviousBestData = await database.getPreviousBest();
+        await database.setPreviousBest(newPreviousBestDataToSet, fakeGuildId);
+        returnedNewPreviousBestData = await database.getPreviousBest(fakeGuildId);
 
         expect(returnedNewPreviousBestData.name).to.equal('New Previous Best')
           && expect(returnedNewPreviousBestData.declaredBy).to.equal('Declared By Old')
@@ -198,7 +200,7 @@ describe('app', async () => {
 
       let messageSendSpy;
 
-      it('on non-amibuguous declaration, message.channel.send() is called once with expected parameter', async () => {
+      it('on non-amibuguous declaration, message.channel.send() is called once with message confirming declaration', async () => {
         // fake discord message object
         const message = {
           author: {
@@ -208,6 +210,9 @@ describe('app', async () => {
           channel: {
             send: function (msg) {
               return;
+            },
+            guild: {
+              id: fakeGuildId
             }
           }
         }
@@ -218,6 +223,58 @@ describe('app', async () => {
         expect(messageSendSpy.calledOnce);
         expect(messageSendSpy.args[0][0]).to.equal('hawaiian pizza has been declared the best! Say "I take back that best declaration!" to cancel.');
       })
+
+      
+      it('on repeat declaration, message.channel.send() is called once with message rejecting repeat delcaration', async () => {
+        // fake discord message object
+        const message = {
+          author: {
+            username: 'Guy Incognito'
+          },
+          content: 'Oh man, hawaiian pizza is the best!',
+          channel: {
+            send: function (msg) {
+              return;
+            },
+            guild: {
+              id: fakeGuildId
+            }
+          }
+        }
+
+        messageSendSpy = sinon.spy(message.channel, 'send')
+
+        await handlers.handleDeclaration(message, null);
+        expect(messageSendSpy.calledOnce);
+        expect(messageSendSpy.args[0][0]).to.equal('hawaiian pizza is already the best!');
+      })
+
+
+      it('on repeat declaration, message.channel.send() is called once with message rejecting repeat delcaration', async () => {
+        // fake discord message object
+        const message = {
+          author: {
+            username: 'Guy Incognito'
+          },
+          content: 'Oh man, hawaiian pizza is the best!',
+          channel: {
+            send: function (msg) {
+              return;
+            },
+            guild: {
+              id: fakeGuildId
+            }
+          }
+        }
+
+        messageSendSpy = sinon.spy(message.channel, 'send')
+
+        await handlers.handleDeclaration(message, null);
+        expect(messageSendSpy.calledOnce);
+        expect(messageSendSpy.args[0][0]).to.equal('hawaiian pizza is already the best!');
+      })
+
+
     })
   })
 

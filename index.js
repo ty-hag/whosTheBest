@@ -37,21 +37,7 @@ client.once('ready', () => {
   console.log('whosTheBest bot active!');
 });
 
-// when user just says "you're the best" it should refer back to the last person to write a message
-// to the channel that is not the sender
-let messageAuthorTracker = {
-  lastActive: '',
-  activeAuthor: ''
-};
-
-let authorOfAmbiguousDeclaration = '';
-
 client.on('message', async message => {
-
- if(message.author.username !== messageAuthorTracker.activeAuthor){
-  messageAuthorTracker.lastActive = messageAuthorTracker.activeAuthor;
-  messageAuthorTracker.activeAuthor = message.author.username;
- }
 
   if (message.author.bot) {
     return;

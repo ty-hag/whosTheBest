@@ -13,8 +13,8 @@ admin.initializeApp({
 
 const app = admin.app();
 const db = admin.database();
-const currentBestRef = process.env.TESTING ? db.ref('test/currentBest') : db.ref('currentBest');
-const previousBestRef = process.env.TESTING ? db.ref('test/previousBest') : db.ref('previousBest');
+const currentBestRefBaseString = process.env.TESTING ? 'test/currentBest' : 'currentBest';
+const previousBestRefBaseString = process.env.TESTING ? 'test/previousBest' : 'previousBest';
 
 // setting for duration output
 const durationFormat = {
@@ -26,23 +26,30 @@ const durationFormat = {
 
 // functions
 
-const setCurrentBest = (data) => {
+const setCurrentBest = (data, guildId) => {
   return new Promise(async (resolve, reject) => {
 
     // validate data
     const validName = typeof (data.name) === 'string' && data.name.length > 0 ? true : false;
     const validDeclaredBy = typeof (data.declaredBy) === 'string' && data.declaredBy.length > 0 ? true : false;
     const validBecameBestAt = typeof (data.becameBestAt) === 'number' && data.becameBestAt > -1 ? true : false;
-    if (!validName || !validDeclaredBy || !validBecameBestAt) {
-      reject(`setCurrentBest received invalid input. Values on argument: ${data.name}, ${data.declaredBy}, ${data.validBecameBestAt})`);
+    const validGuildId = typeof (guildId) === 'string' && guildId.length > 0 ? true : false;
+    if (!validName || !validDeclaredBy || !validBecameBestAt || !validGuildId) {
+      reject(`setCurrentBest received invalid input. Values on argument: ${data.name}, ${data.declaredBy}, ${data.becameBestAt}), ${data.guildId}`);
+      return; // Instead of returning here should I just put the rest of the function in an else block? https://stackoverflow.com/questions/32536049/do-i-need-to-return-after-early-resolve-reject
     }
 
     try {
-      await currentBestRef.set( // for reference, this function call returns undefined when successful
+      // REFACTOR?
+      const currentBestRef = db.ref(currentBestRefBaseString);
+      // update() will write new data if non exists at guildId specified
+      await currentBestRef.update( // for reference, this function call returns undefined when successful
         {
-          name: data.name,
-          declaredBy: data.declaredBy,
-          becameBestAt: data.becameBestAt
+          [guildId]: {
+            name: data.name,
+            declaredBy: data.declaredBy,
+            becameBestAt: data.becameBestAt,
+          }
         }
       )
       resolve();
@@ -54,10 +61,19 @@ const setCurrentBest = (data) => {
   })
 }
 
-const setPreviousBest = (data) => {
+const setPreviousBest = (data, guildId) => {
   return new Promise(async (resolve, reject) => {
     try {
-      await previousBestRef.set(data);
+      const ref = db.ref(previousBestRefBaseString)
+      await ref.update(
+        {
+          [guildId]: {
+            name: data.name,
+            declaredBy: data.declaredBy,
+            becameBestAt: data.becameBestAt,
+          }
+        }
+      );
       resolve();
     } catch (error) {
       console.log('Error in setPreviousBest:')
@@ -67,20 +83,17 @@ const setPreviousBest = (data) => {
   })
 }
 
-const getCurrentBest = () => {
+const getCurrentBest = (guildId) => {
   // return the name of the current best and how long they've been the best for
   return new Promise(async (resolve, reject) => {
     try {
       // query db
-      const currentBestDataSnapshot = await currentBestRef.once('value');
+      const ref = db.ref(`${currentBestRefBaseString}/${guildId}`);
+      const snapshot = await ref.once('value');
+      const data = snapshot.val();
 
-      // format data
-      const bestData = {};
-      bestData.name = currentBestDataSnapshot.val().name;
-      bestData.becameBestAt = currentBestDataSnapshot.val().becameBestAt;
-      bestData.declaredBy = currentBestDataSnapshot.val().declaredBy;
+      resolve(data);
 
-      resolve(bestData);
     } catch (error) {
       console.log('Error in getCurrentBest:')
       console.log(error);
@@ -90,26 +103,37 @@ const getCurrentBest = () => {
   })
 }
 
-const getPreviousBest = () => {
+const getPreviousBest = (guildId) => {
   // return the name of the current best and how long they've been the best for
   return new Promise(async (resolve, reject) => {
     try {
       // query db
-      const previousBestDataSnapshot = await previousBestRef.once('value');
+      const ref = db.ref(`${previousBestRefBaseString}/${guildId}`)
+      const snapshot = await ref.once('value');
+      const data = snapshot.val();
 
-      // format data
-      const previousBestData = {};
-      previousBestData.name = previousBestDataSnapshot.val().name;
-      previousBestData.becameBestAt = previousBestDataSnapshot.val().becameBestAt;
-      previousBestData.declaredBy = previousBestDataSnapshot.val().declaredBy;
+      resolve(data);
 
-      resolve(previousBestData);
     } catch (error) {
       console.log('Error in getPreviousBest:')
       console.log(error);
       reject(error);
     }
 
+  })
+}
+
+const deleteCurrentBest = (guildId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const ref = db.ref(`${currentBestRefBaseString}/${guildId}`);
+      await ref.remove();
+      resolve();
+    } catch (error) {
+      console.log('Error in deleteCurrentBest');
+      console.log(error);
+      reject(error);
+    }
   })
 }
 
@@ -136,13 +160,15 @@ const disconnectFromDb = () => {
   })
 }
 
-const wipeTestData = () => {
+const wipeTestData = (guildId) => {
   if (!process.env.TESTING) { // stop this from running in prod
     return;
   } else {
     return new Promise(async (resolve, reject) => {
       try {
+        const currentBestRef = db.ref(`${currentBestRefBaseString}/${guildId}`)
         await currentBestRef.remove();
+        const previousBestRef = db.ref(`${previousBestRefBaseString}/${guildId}`)
         await previousBestRef.remove();
         resolve();
       } catch (error) {
@@ -160,6 +186,7 @@ module.exports = {
   setPreviousBest,
   getCurrentBest,
   getPreviousBest,
+  deleteCurrentBest,
   disconnectFromDb,
   wipeTestData
 };
