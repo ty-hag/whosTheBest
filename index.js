@@ -2,28 +2,6 @@
 
 Discord bot to keep track of who is the best
 
-TODO:
-
-Testing
-- (WIP) Write test for database functions
-  - (DONE) Tests for getCurrentBest
-  - (DONE) Tests for setCurrentBest
-- (NOT STARTED) Write tests for handlers.handleDeclaration
- - (NOT STARTED) Write test for duplicate best declaration
- - (NOT STARTED) Write test for ambiguous best declaration
- - (NOT STARTED) Write test for new best declaration
-
-Handle pronouns
-- (BUG) 2nd person
- - (WIP) Is not 
-- (NOT STARTED) 3rd person
-  - (NOT STARTED) Consider: if user says pronoun only, bot asks for specific name, if you again, bot is declared the best 
-
-(DONE) Seed test database
-
-Send message to channel on join?
-https://stackoverflow.com/questions/45120618/send-a-message-with-discord-js
-
 */
 
 
@@ -63,3 +41,25 @@ client.on('message', async message => {
 
 client.login(process.env.DISCORD_TOKEN);
 
+/*
+
+TODO:
+
+Testing
+- (DONE) Write test for database functions
+  - (DONE) Tests for getCurrentBest
+  - (DONE) Tests for setCurrentBest
+
+Handle pronouns
+- (DONE) 2nd person
+- (NOT STARTED) 3rd person
+  - (NOT STARTED) Consider: if user says pronoun only, bot asks for specific name, if you again, bot is declared the best 
+
+(DONE) Seed test database
+
+Send message to channel on join?
+https://stackoverflow.com/questions/45120618/send-a-message-with-discord-js
+
+
+
+*/
